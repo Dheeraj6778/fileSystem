@@ -42,9 +42,47 @@ vector<string> splitString(string s)
     temp.push_back(tempString);
     return temp;
 }
+int isFile(string path)
+{
+    DIR *directory = opendir(path.c_str());
+
+    if (directory != NULL)
+    {
+        closedir(directory);
+        return 0;
+    }
+
+    if (errno == ENOTDIR)
+    {
+        return 1;
+    }
+
+    return -1;
+}
+void fun(string basePath)
+{
+    string tempPath = "";
+    struct dirent *dp;
+    DIR *dir = opendir(basePath.c_str());
+    if (dir == NULL)
+        return;
+    while ((dp = readdir(dir)) != NULL)
+    {
+        string st1 = dp->d_name;
+        if (st1 != "." and st1 != "..")
+        {
+            cout<<st1<<endl;
+            tempPath = basePath;
+            tempPath += "/" + st1;
+            fun(tempPath);
+        }
+    }
+    closedir(dir);
+}
 int main()
 {
-    string path = "te.cpp";
-    string dest = get_current_dir_name();
-    cout<<dest<<endl;
+    string path = "/mnt/c/Users/Anonymous/Desktop/AOS/AOS Ass 1";
+    cout << path << endl;
+    fun(path);
+    return 0;
 }

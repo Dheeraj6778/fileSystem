@@ -7,6 +7,7 @@
 #include <stack>
 #include <termios.h>
 #include <unistd.h>
+#include<dirent.h>
 #include <filesystem>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -224,7 +225,29 @@ vector<string> splitString(string s)
     temp.push_back(tempString);
     return temp;
 }
-
+void search(string basePath, string searchFor, int &flag)
+{
+    string tempPath = "";
+    struct dirent *re;
+    DIR *dir = opendir(basePath.c_str());
+    if (dir == NULL)
+        return;
+    while ((re = readdir(dir)) != NULL)
+    {
+        string st1 = re->d_name;
+        if(st1==searchFor){
+            flag=1;
+            return;
+        }
+        if(st1!="." and st1!="..")
+        {
+            tempPath=basePath;
+            tempPath+="/"+st1;
+            search(tempPath,searchFor,flag);
+        }
+    }
+    closedir(dir);
+}
 void commandMode()
 {
     string currPath = get_current_dir_name();
@@ -324,17 +347,28 @@ void commandMode()
             {
                 cout << "couldn't change directory" << endl;
             }
-            else{
-                cout<<"the current directory is "
-                currPath=get_current_dir_name();
-                cout<<currPath<<endl;
+            else
+            {
+                cout << "the current directory is ";
+                currPath = get_current_dir_name();
+                cout << currPath << endl;
             }
+        }
+        else if (commands[0] == "search")
+        {
+            string searchFor = commands.back();
+            int flag=0;
+            search(currPath,searchFor,flag);
+            if(flag==0)
+                cout<<"file not found"<<endl;
+            else
+                cout<<"file found"<<endl;
         }
     }
 }
 int main()
 {
-    string path = "/mnt/c/Users/Anonymous/Desktop/AOS";
+    string path = "/mnt/c/Users/Anonymous/Desktop/AOS/AOS Ass 1";
     struct passwd *pw = getpwuid(getuid());
     const char *homedir = pw->pw_dir;
     string home = pw->pw_dir;
@@ -421,6 +455,13 @@ int main()
             else
             {
                 // open the file
+                int pid = fork();
+                if (pid == 0)
+                {
+                    // child process created
+                    string fpath = (v[index]).filePath;
+                    execl("/usr/bin/xdg-open", "/usr/bin/xdg-open", fpath.c_str(), (char *)NULL);
+                }
             }
         }
         else if (ch == 'D')
