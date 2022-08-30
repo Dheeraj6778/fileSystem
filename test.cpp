@@ -79,10 +79,31 @@ void fun(string basePath)
     }
     closedir(dir);
 }
+void deldir(string basePath)
+{
+    struct dirent *re;
+    DIR *dir = opendir(basePath.c_str());
+    if (dir == NULL)
+        return;
+    string tempPath = "";
+    while ((re = readdir(dir)) != NULL)
+    {
+        string st1 = re->d_name;
+        if (st1 != "." and st1 != "..")
+        {
+            tempPath = basePath;
+            tempPath += "/" + st1;
+            remove(tempPath.c_str());
+            deldir(tempPath);
+            //remove(tem)
+        }
+    }
+    remove(basePath.c_str());
+}
 int main()
 {
-    string path = "/mnt/c/Users/Anonymous/Desktop/AOS/AOS Ass 1";
+    string path = "./testt";
     cout << path << endl;
-    fun(path);
+    deldir(path);
     return 0;
 }

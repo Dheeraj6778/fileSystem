@@ -7,7 +7,7 @@
 #include <stack>
 #include <termios.h>
 #include <unistd.h>
-#include<dirent.h>
+#include <dirent.h>
 #include <filesystem>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -235,18 +235,40 @@ void search(string basePath, string searchFor, int &flag)
     while ((re = readdir(dir)) != NULL)
     {
         string st1 = re->d_name;
-        if(st1==searchFor){
-            flag=1;
+        if (st1 == searchFor)
+        {
+            flag = 1;
             return;
         }
-        if(st1!="." and st1!="..")
+        if (st1 != "." and st1 != "..")
         {
-            tempPath=basePath;
-            tempPath+="/"+st1;
-            search(tempPath,searchFor,flag);
+            tempPath = basePath;
+            tempPath += "/" + st1;
+            search(tempPath, searchFor, flag);
         }
     }
     closedir(dir);
+}
+void deldir(string basePath)
+{
+    struct dirent *re;
+    DIR *dir = opendir(basePath.c_str());
+    if (dir == NULL)
+        return;
+    string tempPath = "";
+    while ((re = readdir(dir)) != NULL)
+    {
+        string st1 = re->d_name;
+        if (st1 != "." and st1 != "..")
+        {
+            tempPath = basePath;
+            tempPath += "/" + st1;
+            remove(tempPath.c_str());
+            deldir(tempPath);
+            // remove(tem)
+        }
+    }
+    remove(basePath.c_str());
 }
 void commandMode()
 {
@@ -334,11 +356,6 @@ void commandMode()
             string fpath = commands[1];
             remove(fpath.c_str());
         }
-        else if (commands[0] == "delete_dir")
-        {
-            string fpath = commands[1];
-            rmdir(fpath.c_str());
-        }
         else if (commands[0] == "goto")
         {
             string dpath = commands[1];
@@ -357,12 +374,17 @@ void commandMode()
         else if (commands[0] == "search")
         {
             string searchFor = commands.back();
-            int flag=0;
-            search(currPath,searchFor,flag);
-            if(flag==0)
-                cout<<"file not found"<<endl;
+            int flag = 0;
+            search(currPath, searchFor, flag);
+            if (flag == 0)
+                cout << "file not found" << endl;
             else
-                cout<<"file found"<<endl;
+                cout << "file found" << endl;
+        }
+        else if (commands[0] == "delete_dir")
+        {
+            string delDir = commands.back();
+            deldir(delDir);
         }
     }
 }
