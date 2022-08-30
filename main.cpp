@@ -224,6 +224,7 @@ vector<string> splitString(string s)
     temp.push_back(tempString);
     return temp;
 }
+
 void commandMode()
 {
     while (true)
@@ -232,7 +233,8 @@ void commandMode()
         string command;
         getline(cin, command);
         vector<string> commands = splitString(command);
-        if (commands[0] == "quit"){
+        if (commands[0] == "quit")
+        {
             exit(0);
         }
         if (commands[0] == "copy")
@@ -240,14 +242,36 @@ void commandMode()
             vector<string> files;
             for (int i = 1; i <= commands.size() - 2; i++)
                 files.push_back(commands[i]);
-            string dest=commands.back();
-            for(auto f: files)
+            string dest = commands.back();
+            for (auto f : files)
             {
-                string src=f;
-                string temp_dest=dest;
-                temp_dest+="/"+src;
+                string src = f;
+                string temp_dest = dest;
+                temp_dest += "/" + src;
                 copy(src, temp_dest);
             }
+        }
+        else if (commands[0] == "move")
+        {
+            vector<string> files;
+            for (int i = 1; i <= commands.size() - 2; i++)
+                files.push_back(commands[i]);
+            string dest = commands.back();
+            for (auto f : files)
+            {
+                string src = f;
+                string temp_dest = dest;
+                temp_dest += "/" + src;
+                copy(src, temp_dest);
+                remove(src.c_str());
+            }
+        }
+        else if (commands[0] == "rename")
+        {
+            string old = commands[1];
+            string newName=commands.back();
+            copy(old,newName);
+            remove(old.c_str());
         }
     }
 }
