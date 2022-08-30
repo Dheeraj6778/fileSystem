@@ -4,17 +4,19 @@
 #include <vector>
 #include <pwd.h>
 #include <grp.h>
-#include<stack>
+#include <stack>
 #include <termios.h>
 #include <unistd.h>
 #include <filesystem>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <ctime>
 using namespace std;
 struct termios orig_termios;
 namespace fs = std::filesystem;
 int index = 0;
 stack<string> pathStack;
+stack<string> rightStack;
 class Node
 {
 public:
@@ -69,11 +71,11 @@ void display(vector<Node> v)
         }
         else
             cout << left << setw(5) << "     ";
-        cout << left << setw(30) << v[i].FileName << " ";
+        cout << left << setw(25) << v[i].FileName << " ";
         cout << left << setw(10) << v[i].FileSize << "  ";
-        cout << left << setw(20) << v[i].perm << " ";
-        cout << left << setw(20) << v[i].user_name << " ";
-        cout << left << setw(20) << v[i].group_name << " ";
+        cout << left << setw(10) << v[i].perm << " ";
+        cout << left << setw(10) << v[i].user_name << " ";
+        cout << left << setw(10) << v[i].group_name << " ";
         cout << left << setw(20) << v[i].lastModified << endl;
     }
 }
@@ -162,22 +164,6 @@ void showFilesandFolders(string path)
     v = ve;
     display(v);
 }
-void nav(string path)
-{
-    for (auto &file : fs::recursive_directory_iterator(path))
-    {
-        string filePath = file.path();
-        string FileName = extractFileName(filePath);
-        struct stat info;
-        stat(filePath.c_str(), &info);
-        int FileSize = info.st_size;
-        auto p = printPermissions(filePath);
-        struct passwd *pw = getpwuid(info.st_uid);
-        struct group *gr = getgrgid(info.st_gid);
-        Node n(FileName, FileSize, p.first, pw->pw_name, gr->gr_name, p.second, filePath);
-        v.push_back(n);
-    }
-}
 int getBackSlashIndex(string s)
 {
     int ind = 0;
@@ -196,6 +182,73 @@ void emptyStack()
     while (!pathStack.empty())
         pathStack.pop();
 }
+void copy(string src_path, string dest_path)
+{
+    FILE *fp1;
+    FILE *fp2;
+    fp1 = fopen(src_path.c_str(), "r");
+    if (fp1 == NULL)
+    {
+        cout << "cannot open the source file" << endl;
+        return;
+    }
+    fp2 = fopen(dest_path.c_str(), "w");
+    if (fp2 == NULL)
+    {
+        cout << "cannot open the destination file" << endl;
+        return;
+    }
+    char c = fgetc(fp1);
+    while (c != EOF)
+    {
+        fputc(c, fp2);
+        c = fgetc(fp1);
+    }
+    fclose(fp1);
+    fclose(fp2);
+}
+vector<string> splitString(string s)
+{
+    vector<string> temp;
+    string tempString = "";
+    for (int i = 0; i < s.size(); i++)
+    {
+        if (s[i] == ' ')
+        {
+            temp.push_back(tempString);
+            tempString = "";
+        }
+        else
+            tempString += s[i];
+    }
+    temp.push_back(tempString);
+    return temp;
+}
+void commandMode()
+{
+    while (true)
+    {
+        cout << "enter the command" << endl;
+        string command;
+        getline(cin, command);
+        vector<string> commands = splitString(command);
+        if (commands[0] == "quit")
+            return;
+        if (commands[0] == "copy")
+        {
+            vector<string> files;
+            for (int i = 1; i <= commands.size() - 2; i++)
+                files.push_back(commands[i]);
+            string dest=commands.back();
+            for(auto f: files)
+            {
+                string src=f;
+                dest+="/"+src;
+                copy(src,dest);
+            }
+        }
+    }
+}
 int main()
 {
     string path = "/mnt/c/Users/Anonymous/Desktop/AOS";
@@ -205,6 +258,7 @@ int main()
     showFilesandFolders(path);
     display(v);
     cout << path << endl;
+    pathStack.push(path);
     enableRawMode();
     while (1)
     {
@@ -216,7 +270,7 @@ int main()
             // up
             if (!pathStack.empty() and pathStack.top() != path)
                 pathStack.push(path);
-            if(pathStack.empty())
+            if (pathStack.empty())
                 pathStack.push(path);
             if (index - 1 >= 0)
             {
@@ -267,17 +321,60 @@ int main()
             showFilesandFolders(path);
             cout << path << endl;
         }
-        else if(ch==10)
+        else if (ch == 10)
         {
-            path=(v[index]).filePath;
-            if (!pathStack.empty() and pathStack.top() != path)
-                pathStack.push(path);
-            if (pathStack.empty())
-                pathStack.push(path);
-            index = 0;
-            showFilesandFolders(path);
-            cout << path << endl;
-        }
 
+            path = (v[index]).filePath;
+            if (fs::is_directory(path))
+            {
+                if (!pathStack.empty() and pathStack.top() != path)
+                    pathStack.push(path);
+                if (pathStack.empty())
+                    pathStack.push(path);
+                index = 0;
+                showFilesandFolders(path);
+                cout << path << endl;
+            }
+            else
+            {
+                // open the file
+            }
+        }
+        else if (ch == 'D')
+        {
+            if (!pathStack.empty())
+            {
+                string temp_path = pathStack.top();
+                rightStack.push(temp_path);
+                pathStack.pop();
+                if (!pathStack.empty())
+                {
+                    path = pathStack.top();
+                    showFilesandFolders(path);
+                    cout << path << endl;
+                }
+            }
+            //}
+        }
+        else if (ch == 'C')
+        {
+            // right arrow
+            if (!rightStack.empty())
+            {
+                path = rightStack.top();
+                showFilesandFolders(path);
+                cout << path << endl;
+                rightStack.pop();
+                pathStack.push(path);
+            }
+        }
+        else if (ch == ':')
+        {
+            // command mode
+            clear();
+            disableRawMode();
+            commandMode();
+            enableRawMode();
+        }
     }
 }

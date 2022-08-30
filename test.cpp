@@ -3,75 +3,45 @@
 #include <unistd.h>
 #include <bits/stdc++.h>
 #include <sys/stat.h>
+#include <fstream>
 #include <filesystem>
 using namespace std;
 struct termios orig_termios;
-namespace fs = std::filesystem;
-void disableRawMode()
+void copy(string src_path, string dest_path)
 {
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
-}
-
-void editorRefreshScreen()
-{
-    write(STDOUT_FILENO, "\x1b[2J", 4);
-    write(STDOUT_FILENO, "\x1b[H", 3);
-}
-void enableRawMode()
-{
-    tcgetattr(STDIN_FILENO, &orig_termios);
-    atexit(disableRawMode);
-    struct termios raw = orig_termios;
-    raw.c_lflag &= ~(ECHO | ICANON);
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
-}
-class Node
-{
-public:
-    string FileName;
-    int FileSize;
-    string perm;
-    string user_name;
-    string group_name;
-    string lastModified;
-    Node(string Fname, int Fsize, string perm, string uName, string gName, string lmodified)
+    FILE *fp1;
+    FILE *fp2;
+    fp1 = fopen(src_path.c_str(), "r");
+    fp2 = fopen(dest_path.c_str(), "w");
+    char c = fgetc(fp1);
+    while (c != EOF)
     {
-        this->FileName = Fname;
-        this->FileSize = Fsize;
-        this->perm = perm;
-        this->user_name = uName;
-        this->group_name = gName;
-        this->lastModified = lmodified;
+        fputc(c, fp2);
+        c=fgetc(fp1);
     }
-};
-string extractFileName(string st)
+    fclose(fp1);
+    fclose(fp2);
+}
+vector<string> splitString(string s)
 {
-    string temp = "";
-    for (int i = st.size() - 1; i >= 0; i--)
+    vector<string> temp;
+    string tempString = "";
+    for (int i = 0; i < s.size(); i++)
     {
-        if (st[i] == '/')
-            break;
+        if (s[i] == ' '){
+            
+            temp.push_back(tempString);
+            tempString = "";
+        }
         else
-            temp += st[i];
+            tempString += s[i];
     }
-    reverse(temp.begin(), temp.end());
+    temp.push_back(tempString);
     return temp;
 }
 int main()
 {
-    string path = "/mnt/c/Users/Anonymous/Desktop/AOS";
-    for (auto &file : fs::directory_iterator(path))
-    {
-        struct stat info;
-        string fp = file.path();
-        stat(fp.c_str(), &info);
-        
-        if(fs::is_directory(fp)){
-            cout << "directory " << info.st_size << endl;
-        }
-        else
-            cout<<"file "<<info.st_size<<endl;
-        
-    }
-    return 0;
+    string path = "te.cpp";
+    string dest = "./testt/copied.txt";
+    copy(path,dest);
 }
