@@ -227,6 +227,7 @@ vector<string> splitString(string s)
 
 void commandMode()
 {
+    string currPath = get_current_dir_name();
     while (true)
     {
         cout << "enter the command" << endl;
@@ -269,9 +270,65 @@ void commandMode()
         else if (commands[0] == "rename")
         {
             string old = commands[1];
-            string newName=commands.back();
-            copy(old,newName);
+            string newName = commands.back();
+            copy(old, newName);
             remove(old.c_str());
+        }
+        else if (commands[0] == "create_file")
+        {
+            string fname = commands[1];
+            string destPath = commands.back();
+            string fpath = destPath + "/" + fname;
+            FILE *fp;
+            fp = fopen(fpath.c_str(), "w");
+            if (fp == NULL)
+            {
+                cout << "Unable to create file" << endl;
+                continue;
+            }
+            else
+            {
+                cout << "file is created " << endl;
+            }
+        }
+        else if (commands[0] == "create_dir")
+        {
+            string folderName = commands[1];
+            string destPath = commands.back();
+            string tempPath = destPath + "/" + folderName;
+            int check = mkdir(tempPath.c_str(), 'w');
+            if (check == 0)
+            {
+                cout << "folder is created" << endl;
+            }
+            else
+            {
+                cout << "folder is not created" << endl;
+            }
+        }
+        else if (commands[0] == "delete_file")
+        {
+            string fpath = commands[1];
+            remove(fpath.c_str());
+        }
+        else if (commands[0] == "delete_dir")
+        {
+            string fpath = commands[1];
+            rmdir(fpath.c_str());
+        }
+        else if (commands[0] == "goto")
+        {
+            string dpath = commands[1];
+            int flag = chdir(dpath.c_str());
+            if (flag == 1)
+            {
+                cout << "couldn't change directory" << endl;
+            }
+            else{
+                cout<<"the current directory is "
+                currPath=get_current_dir_name();
+                cout<<currPath<<endl;
+            }
         }
     }
 }

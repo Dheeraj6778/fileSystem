@@ -5,6 +5,8 @@
 #include <sys/stat.h>
 #include <fstream>
 #include <filesystem>
+#include <sys/types.h>
+#include <dirent.h>
 using namespace std;
 struct termios orig_termios;
 void copy(string src_path, string dest_path)
@@ -17,7 +19,7 @@ void copy(string src_path, string dest_path)
     while (c != EOF)
     {
         fputc(c, fp2);
-        c=fgetc(fp1);
+        c = fgetc(fp1);
     }
     fclose(fp1);
     fclose(fp2);
@@ -28,8 +30,9 @@ vector<string> splitString(string s)
     string tempString = "";
     for (int i = 0; i < s.size(); i++)
     {
-        if (s[i] == ' '){
-            
+        if (s[i] == ' ')
+        {
+
             temp.push_back(tempString);
             tempString = "";
         }
@@ -42,6 +45,6 @@ vector<string> splitString(string s)
 int main()
 {
     string path = "te.cpp";
-    string dest = "./testt/copied.txt";
-    copy(path,dest);
+    string dest = get_current_dir_name();
+    cout<<dest<<endl;
 }
