@@ -232,8 +232,9 @@ void commandMode()
         string command;
         getline(cin, command);
         vector<string> commands = splitString(command);
-        if (commands[0] == "quit")
-            return;
+        if (commands[0] == "quit"){
+            exit(0);
+        }
         if (commands[0] == "copy")
         {
             vector<string> files;
@@ -243,8 +244,9 @@ void commandMode()
             for(auto f: files)
             {
                 string src=f;
-                dest+="/"+src;
-                copy(src,dest);
+                string temp_dest=dest;
+                temp_dest+="/"+src;
+                copy(src, temp_dest);
             }
         }
     }
