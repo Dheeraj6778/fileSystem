@@ -145,13 +145,37 @@ pair<string, string> printPermissions(string path)
     // cout << left << setw(20) << lmod << endl;
     return {temp, lmod};
 }
+// void showFilesandFolders(string path)
+// {
+//     vector<Node> ve;
+//     for (auto &file : fs::directory_iterator(path))
+//     {
+//         string filePath = file.path();
+//         string FileName = extractFileName(filePath);
+//         struct stat info;
+//         stat(filePath.c_str(), &info);
+//         int FileSize = info.st_size;
+//         auto p = printPermissions(filePath);
+//         struct passwd *pw = getpwuid(info.st_uid);
+//         struct group *gr = getgrgid(info.st_gid);
+//         Node n(FileName, FileSize, p.first, pw->pw_name, gr->gr_name, p.second, filePath);
+//         ve.push_back(n);
+//     }
+//     // sort the files
+//     v = ve;
+//     display(v);
+// }
 void showFilesandFolders(string path)
 {
+    struct dirent *re;
+    DIR* dir=opendir(path.c_str());
+    if(dir==NULL)
+        return;
     vector<Node> ve;
-    for (auto &file : fs::directory_iterator(path))
-    {
-        string filePath = file.path();
-        string FileName = extractFileName(filePath);
+    while((re=readdir(dir))!=NULL){
+        string filePath=path;
+        string FileName=re->d_name;
+        filePath+="/"+FileName;
         struct stat info;
         stat(filePath.c_str(), &info);
         int FileSize = info.st_size;
@@ -161,9 +185,9 @@ void showFilesandFolders(string path)
         Node n(FileName, FileSize, p.first, pw->pw_name, gr->gr_name, p.second, filePath);
         ve.push_back(n);
     }
-    // sort the files
     v = ve;
     display(v);
+    closedir(dir);
 }
 int getBackSlashIndex(string s)
 {
@@ -386,6 +410,8 @@ void commandMode()
             string delDir = commands.back();
             deldir(delDir);
         }
+        else if(commands[0]=="esc")
+            return;
     }
 }
 int main()
