@@ -416,7 +416,7 @@ void commandMode()
 }
 int main()
 {
-    string path = "/mnt/c/Users/Anonymous/Desktop/AOS/AOS Ass 1";
+    string path = get_current_dir_name();
     struct passwd *pw = getpwuid(getuid());
     const char *homedir = pw->pw_dir;
     string home = pw->pw_dir;
