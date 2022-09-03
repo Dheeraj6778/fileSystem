@@ -145,26 +145,43 @@ pair<string, string> printPermissions(string path)
     // cout << left << setw(20) << lmod << endl;
     return {temp, lmod};
 }
-// void showFilesandFolders(string path)
-// {
-//     vector<Node> ve;
-//     for (auto &file : fs::directory_iterator(path))
-//     {
-//         string filePath = file.path();
-//         string FileName = extractFileName(filePath);
-//         struct stat info;
-//         stat(filePath.c_str(), &info);
-//         int FileSize = info.st_size;
-//         auto p = printPermissions(filePath);
-//         struct passwd *pw = getpwuid(info.st_uid);
-//         struct group *gr = getgrgid(info.st_gid);
-//         Node n(FileName, FileSize, p.first, pw->pw_name, gr->gr_name, p.second, filePath);
-//         ve.push_back(n);
-//     }
-//     // sort the files
-//     v = ve;
-//     display(v);
-// }
+bool isfile(string name)
+{
+    for (int i = 1; i < name.size(); i++)
+    {
+        if (name[i] == '.')
+            return true;
+    }
+    return false;
+}
+void copydir(string basePath, string dest_path)
+{
+    struct dirent *re;
+    DIR *dir = opendir(basePath.c_str());
+    if (dir == NULL)
+        return;
+    string tempPath = "";
+    while ((re = readdir(dir)) != NULL)
+    {
+        string st1 = re->d_name;
+        if (st1 != "." and st1 != "..")
+        {
+            tempPath = basePath;
+            tempPath += "/" + st1;
+            string de = dest_path + "/" + st1;
+            if (isfile(st1))
+            {
+                copy(tempPath, de);
+            }
+            else
+            {
+                mkdir(de.c_str(), 'w');
+                copydir(tempPath, de);
+            }
+        }
+    }
+    closedir(dir);
+}
 void showFilesandFolders(string path)
 {
     struct dirent *re;
@@ -232,6 +249,7 @@ void copy(string src_path, string dest_path)
     fclose(fp1);
     fclose(fp2);
 }
+
 vector<string> splitString(string s)
 {
     vector<string> temp;
@@ -421,7 +439,7 @@ int main()
     const char *homedir = pw->pw_dir;
     string home = pw->pw_dir;
     showFilesandFolders(path);
-    display(v);
+    //display(v);
     cout << path << endl;
     pathStack.push(path);
     enableRawMode();

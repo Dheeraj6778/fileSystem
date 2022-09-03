@@ -42,23 +42,7 @@ vector<string> splitString(string s)
     temp.push_back(tempString);
     return temp;
 }
-int isFile(string path)
-{
-    DIR *directory = opendir(path.c_str());
 
-    if (directory != NULL)
-    {
-        closedir(directory);
-        return 0;
-    }
-
-    if (errno == ENOTDIR)
-    {
-        return 1;
-    }
-
-    return -1;
-}
 void fun(string basePath)
 {
     string tempPath = "";
@@ -71,7 +55,7 @@ void fun(string basePath)
         string st1 = dp->d_name;
         if (st1 != "." and st1 != "..")
         {
-            cout<<st1<<endl;
+            cout << st1 << endl;
             tempPath = basePath;
             tempPath += "/" + st1;
             fun(tempPath);
@@ -95,15 +79,51 @@ void deldir(string basePath)
             tempPath += "/" + st1;
             remove(tempPath.c_str());
             deldir(tempPath);
-            //remove(tem)
+            // remove(tem)
         }
     }
     remove(basePath.c_str());
 }
+bool isfile(string name)
+{
+    for(int i=1;i<name.size();i++)
+    {
+        if(name[i]=='.')
+            return true;
+    }
+    return false;
+}
+void copydir(string basePath,string dest_path)
+{
+    struct dirent *re;
+    DIR *dir = opendir(basePath.c_str());
+    if (dir == NULL)
+        return;
+    string tempPath = "";
+    while ((re = readdir(dir)) != NULL)
+    {
+        string st1 = re->d_name;
+        if (st1 != "." and st1 != "..")
+        {
+            tempPath = basePath;
+            tempPath += "/" + st1;
+            string de=dest_path+"/"+st1;
+            if(isfile(st1)){
+                copy(tempPath,de);
+            }
+            else{
+                mkdir(de.c_str(),'w');
+                copydir(tempPath,de);
+            }
+        }
+    }
+    closedir(dir);
+}
 int main()
 {
-    string path = "./testt";
+    string path = "./ppp";
+    string src="./testt";
     cout << path << endl;
-    deldir(path);
+    copydir(src,path);
     return 0;
 }
