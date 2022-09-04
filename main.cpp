@@ -373,10 +373,6 @@ void commandMode()
             for (auto f : files)
             {
                 string src = f;
-                // string temp_dest = dest;
-                // temp_dest += "/" + src;
-                // copy(src, temp_dest);
-                // remove(src.c_str());
                 if (isfile(src) == false)
                 {
 
@@ -483,8 +479,6 @@ int main()
     const char *homedir = pw->pw_dir;
     string home = pw->pw_dir;
     showFilesandFolders(path);
-    // display(v);
-    // cout << path << endl;
     pathStack.push(path);
     enableRawMode();
     while (1)
@@ -495,10 +489,6 @@ int main()
         if (ch == 'A')
         {
             // up
-            if (!pathStack.empty() and pathStack.top() != path)
-                pathStack.push(path);
-            if (pathStack.empty())
-                pathStack.push(path);
             if (index - 1 >= 0)
             {
                 index--;
@@ -509,10 +499,7 @@ int main()
         else if (ch == 'B')
         {
             // down
-            if (!pathStack.empty() and pathStack.top() != path)
-                pathStack.push(path);
-            if (pathStack.empty())
-                pathStack.push(path);
+
             if (index + 1 < v.size())
             {
                 index++;
