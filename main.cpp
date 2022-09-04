@@ -6,6 +6,7 @@
 #include <pwd.h>
 #include <grp.h>
 #include <stack>
+#include <fstream>
 #include <termios.h>
 #include <unistd.h>
 #include <dirent.h>
@@ -82,7 +83,8 @@ void display(vector<Node> v)
         cout << left << setw(10) << v[i].group_name << " ";
         cout << left << setw(20) << v[i].lastModified << endl;
     }
-    if(command_mode==false){
+    if (command_mode == false)
+    {
         struct winsize w;
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
         int row = w.ws_row / 2 - 5;
@@ -90,7 +92,6 @@ void display(vector<Node> v)
             cout << endl;
         cout << "NORMAL MODE: " << path << endl;
     }
-    
 }
 string extractFileName(string st)
 {
@@ -211,28 +212,14 @@ void emptyStack()
 }
 void copy(string src_path, string dest_path)
 {
-    FILE *fp1;
-    FILE *fp2;
-    fp1 = fopen(src_path.c_str(), "r");
-    if (fp1 == NULL)
-    {
-        cout << "cannot open the source file" << endl;
-        return;
-    }
-    fp2 = fopen(dest_path.c_str(), "w");
-    if (fp2 == NULL)
-    {
-        cout << "cannot open the destination file" << endl;
-        return;
-    }
-    char c = fgetc(fp1);
-    while (c != EOF)
-    {
-        fputc(c, fp2);
-        c = fgetc(fp1);
-    }
-    fclose(fp1);
-    fclose(fp2);
+
+    ifstream src(src_path.c_str(), ios::binary);
+    ofstream dest(dest_path.c_str(), ios::binary);
+    dest << src.rdbuf();
+    if ((src and dest))
+        cout << "copied successfully" << endl;
+    else
+        cout << "could not copy" << endl;
 }
 void copydir(string basePath, string dest_path)
 {
@@ -326,7 +313,7 @@ void deldir(string basePath)
 }
 void statusBarCommandMode(string currPath)
 {
-    cout << "COMMAND MODE: "<<currPath<<"->";
+    cout << "COMMAND MODE: " << currPath << "->";
 }
 void commandMode()
 {
@@ -463,13 +450,12 @@ void commandMode()
             string delDir = commands.back();
             deldir(delDir);
         }
-        else if(commands[0]=="ls")
+        else if (commands[0] == "ls")
         {
             showFilesandFolders(currPath);
         }
         else if (commands[0] == "esc")
             return;
-        
     }
 }
 int main()
@@ -594,9 +580,9 @@ int main()
             // command mode
             clear();
             disableRawMode();
-            command_mode=true;
+            command_mode = true;
             commandMode();
-            command_mode=false;
+            command_mode = false;
             enableRawMode();
             showFilesandFolders(path);
         }
