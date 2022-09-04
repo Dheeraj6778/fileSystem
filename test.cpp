@@ -124,4 +124,4 @@ int main()
     cout << get_current_dir_name();
     return 0;
 }
-/ mnt / c / Users / Anonymous / Desktop / AOS
+// mnt / c / Users / Anonymous / Desktop / AOS

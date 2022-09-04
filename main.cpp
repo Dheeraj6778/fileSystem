@@ -341,7 +341,10 @@ void commandMode()
                 {
 
                     string temp = currPath + "/" + src;
-                    copydir(temp, dest);
+                    string dtemp=dest+"/"+src;
+                    mkdir(dtemp.c_str(),'w');
+                    //copydir(temp, dest);
+                    copydir(temp,dtemp);
                 }
                 else
                 {
@@ -364,7 +367,10 @@ void commandMode()
                 {
 
                     string temp = currPath + "/" + src;
-                    copydir(temp, dest);
+                    string dtemp = dest + "/" + src;
+                    mkdir(dtemp.c_str(), 'w');
+                    // copydir(temp, dest);
+                    copydir(temp, dtemp);
                     deldir(temp);
                 }
                 else
