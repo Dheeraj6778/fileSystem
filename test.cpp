@@ -121,9 +121,7 @@ void copydir(string basePath,string dest_path)
 }
 int main()
 {
-    string path = "./ppp";
-    string src="./testt";
-    cout << path << endl;
-    copydir(src,path);
+    cout << get_current_dir_name();
     return 0;
 }
+/ mnt / c / Users / Anonymous / Desktop / AOS

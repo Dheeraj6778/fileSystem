@@ -611,7 +611,6 @@ int main()
             commandMode();
             command_mode=false;
             enableRawMode();
-            showFilesandFolders(path);
         }
     }
 }
